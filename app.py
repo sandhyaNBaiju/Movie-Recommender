@@ -3,6 +3,26 @@ import pickle
 import pandas as pd
 import numpy as np
 import requests
+import os
+
+def download_file(url, filename):
+    if not os.path.exists(filename):
+        with st.spinner("Downloading similarity file..."):
+            response = requests.get(url)
+            with open(filename, "wb") as f:
+                f.write(response.content)
+
+# ✅ your correct direct link
+file_url = "https://drive.google.com/uc?id=1bgxw1aD7--vFp22TGo2lSPOJ4ziuJVia"
+
+download_file(file_url, "similarity.pkl")
+
+# ✅ check BEFORE loading
+if not os.path.exists("similarity.pkl"):
+    st.error("similarity.pkl not found! Check your download link.")
+    st.stop()
+
+similarity = pickle.load(open("similarity.pkl", "rb"))
 
 def fetch_poster(movie_id):
     response = requests.get("https://api.themoviedb.org/3/movie/{}?api_key=fbe09f307eb7d7726b2e5f4dffe88edf".format(movie_id))
@@ -28,7 +48,7 @@ def recommend(movie_name):
 movies = pickle.load(open('movies.pkl', 'rb'))
 movies_list = movies['title'].values
 
-similarity = pickle.load(open('similarity.pkl', 'rb'))
+# similarity = pickle.load(open('similarity.pkl', 'rb'))
 
 st.title('Movie Recommender System')
 
