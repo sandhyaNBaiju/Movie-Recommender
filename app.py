@@ -37,13 +37,26 @@ def recommend(movie_name):
 
     recommended_movies =[]
     recommended_movies_posters = []
+    recommended_movies_links = []   # NEW
+
     for movie in movie_list:
-        movies_id = movies.iloc[movie[0]].Movie_id_x
+        idx = movie[0]
+
+        # 1. FIRST define title
+        title = str(movies.iloc[idx]["title"]).strip()
+
+        movies_id = movies.iloc[idx]["Movie_id_x"]
 
         recommended_movies.append(movies.iloc[movie[0]]['title'])
         # fetch poster from API
         recommended_movies_posters.append(fetch_poster(movies_id))
-    return recommended_movies, recommended_movies_posters
+
+        # imdb link
+        imdb_url = "https://www.imdb.com/find?q=" + title.replace(" ", "+")
+        recommended_movies_links.append(imdb_url)
+
+
+    return recommended_movies, recommended_movies_posters, recommended_movies_links
 
 movies = pickle.load(open('movies.pkl', 'rb'))
 movies_list = movies['title'].values
@@ -56,28 +69,19 @@ selected_movie_name = st.selectbox(
     "Movies List",
     movies_list)
 
-if st.button("Recommend", type="primary"):
-    names, posters = recommend(selected_movie_name)
-    col1, col2, col3, col4, col5 = st.columns(5)
+if st.button("Recommend", type = "primary"):
+    names, posters, links = recommend(selected_movie_name)
 
-    with col1:
-        st.text(names[0])
-        st.image(posters[0])
+    cols = st.columns(5)
 
-    with col2:
-        st.text(names[1])
-        st.image(posters[1])
-
-    with col3:
-        st.text(names[3])
-        st.image(posters[2])
-
-    with col4:
-        st.text(names[3])
-        st.image(posters[3])
-
-    with col5:
-        st.text(names[4])
-        st.image(posters[4])
-
-
+    for i in range(5):
+        with cols[i]:
+            st.markdown(
+                f"""
+                <a href="{links[i]}" target="_blank">
+                    <img src="{posters[i]}" style="width:150px; border-radius:10px;">
+                </a>
+                """,
+                unsafe_allow_html=True
+            )
+            st.write(names[i])
